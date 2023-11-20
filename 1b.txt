@@ -1,0 +1,162 @@
+#!/bin/bash 
+createaddressbook() 
+{ 
+echo 
+if [ -e addressbook.txt ]
+then 
+echo "address book is already created" 
+else 
+touch addressbook.txt 
+echo " address book created" 
+fi 
+} 
+
+
+insertrecord() 
+{ 
+while true 
+do 
+echo -e "\n To add a record to book, please enter the information in following format : " 
+echo -e "\n lastname,firstname,email,mobile no." 
+echo -e "\n Eg : 
+Venkatesh,Vaishnav,vaishnavvenkatesh@gmail.com,8600278899" echo "to quit press 'q'" 
+read newrecord 
+if [ "$newrecord" == 'q' ] 
+then 
+break 
+fi 
+echo $newrecord >> addressbook.txt 
+echo "record inserted successfully" 
+echo -e "\n" 
+done 
+} 
+viewrecords() 
+{ 
+cat addressbook.txt 
+} 
+searchrecord() 
+{ 
+while true 
+do 
+echo "To search a record, enter any string :" 
+echo "eg : last name or email address(case sensitive)" echo "for exit enter 'q'" 
+read sayrec 
+echo "record of \"$sayrec\" : " 
+if [ "$sayrec" == 'q' ] 
+then 
+break 
+fi 
+echo "record of \"$sayrec\" : " 
+grep "$sayrec" addressbook.txt 
+returnstatus=`echo $?` 
+if [ $returnstatus -eq 1 ] 
+then 
+echo "no record found"
+fi 
+done 
+} 
+
+
+
+
+
+modifyrecord() 
+{ 
+while true 
+do 
+echo "To modify a record, enter any string :" 
+echo "eg : last name or email address(case sensitive)" echo "for exit enter 'q'" 
+read mrecord 
+if [ "$mrecord" == 'q' ] 
+then 
+break 
+fi 
+echo -e "\n listing records for \"$mrecord\" : " 
+grep -i -n "$mrecord" addressbook.txt 
+returnstatus=`echo $?` 
+if [ $returnstatus -eq 1 ] 
+then 
+echo "no record found" 
+else 
+echo "Enter the line number (the first number of the entry) that you would like to edit : " 
+read linenumber 
+echo 
+for line in `grep -n "$mrecord" addressbook.txt` 
+do 
+number=`echo "$line" | cut -c 1` 
+if [ $number -eq $linenumber ] 
+then 
+echo "what would you like to change it to? use the format : " echo "last name,first name,email id,mobile no." 
+read erecord 
+linechange="${linenumber}s" 
+sed -i -e "$linechange/.*/$erecord/" addressbook.txt echo -e "\n address book updated successfully" 
+fi 
+done 
+fi 
+done 
+} 
+deleterecord() 
+{ 
+while true 
+do 
+echo "To remove a record, enter any string :" 
+echo "eg : last name or email address(case sensitive)" echo "for exit enter 'q'" 
+read drecord 
+if [ "$drecord" == 'q' ] 
+then
+break 
+fi 
+
+echo -e "\n listing records for \"$drecord\" : " 
+grep -i -n "$drecord" addressbook.txt 
+retstatus=`echo $?` 
+if [ $retstatus -eq 1 ] 
+then 
+echo "no record found" 
+else 
+echo "Enter the line number (the first number of the entry) that you would like to edit : " 
+read linenum 
+echo 
+for line in `grep -n "$drecord" addressbook.txt` 
+do 
+num=`echo "$line" | cut -c 1` 
+if [ $num -eq $linenum ] 
+then 
+lineremove="${linenum}d" 
+sed -i -e "$lineremove" addressbook.txt 
+echo -e "\n record deleted successfully" 
+fi 
+done 
+fi 
+done 
+} 
+lastcharoffile=`tail -c 1 addressbook.txt` 
+if [ -n "$lastcharoffile" ] 
+then 
+echo >> addressbook.txt 
+fi 
+echo "address book?" 
+echo "enter your choice" 
+while true 
+do 
+echo "1: create address book" 
+echo "2: insert a record" 
+echo "3: view records" 
+echo "4: modify a record" 
+echo "5: delete a single record" 
+echo "6: search a record" 
+echo "7: exit" 
+echo 
+read ch 
+case $ch in 
+1)createaddressbook;; 
+2)insertrecord;; 
+3)viewrecords;; 
+4)modifyrecord;; 
+5)deleterecord;; 
+
+
+6)searchrecord;;
+7)exit;; 
+esac 
+done 
