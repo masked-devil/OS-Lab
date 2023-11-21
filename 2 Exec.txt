@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+void displayArray(int arr[], int size) {
+  for (int i = 0; i < size; i++) {
+    printf("%d ", arr[i]);
+  }
+  printf("\n");
+}
+
+int main() {
+  int arrSize;
+
+  printf("Enter the size of the array: ");
+  scanf("%d", &arrSize);
+
+  int arr[arrSize];
+
+  printf("Enter %d elements for the array:\n", arrSize);
+  for (int i = 0; i < arrSize; i++) {
+      scanf("%d", &arr[i]);
+  }
+
+  pid_t pid = fork();
+ if (pid > 0) {
+   
+    wait(NULL); 
+    
+    for (int i = 0; i < arrSize - 1; i++) {
+      for (int j = 0; j < arrSize - i - 1; j++) {
+        if (arr[j] > arr[j + 1]) {
+       
+          int temp = arr[j];
+          arr[j] = arr[j + 1];
+          arr[j + 1] = temp;
+        }
+      }
+    }
+
+    printf("Parent process - Sorted array: ");
+    displayArray(arr, arrSize);
+
+     char *args[arrSize + 3]; 
+
+    args[0] = "./child_program";
+    args[1] = "-r";
+
+    for (int i = 0; i < arrSize; i++) {
+      args[i + 2] = malloc(12); 
+      snprintf(args[i + 2], 12, "%d", arr[i]);
+    }
+
+    args[arrSize + 2] = NULL; 
+
+    execve(args[0], args, NULL);
+
+  } 
+
+  return 0;
+}
+// child_program.c
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+  
+
+  int arrSize = argc - 2;
+  int arr[arrSize];
+
+  // Convert command line arguments to integers
+  for (int i = 2; i < argc; i++) {
+    arr[i - 2] = atoi(argv[i]);
+  }
+
+  // Display the array in reverse order
+  printf("Child process - Reverse order: ");
+  for (int i = arrSize - 1; i >= 0; i--) {
+    printf("%d ", arr[i]);
+  }
+  printf("\n");
+
+  return 0;
+}
